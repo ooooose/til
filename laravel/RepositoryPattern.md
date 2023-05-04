@@ -129,7 +129,7 @@ ServiceクラスにはRepositoryのインターフェースを渡す。<br />
 そしてgetSample()でRepositoryのgetSampleById()を呼ぶように処理を追加する。
 
 コンストラクタインジェクションとは<br />
-(参考記事)[https://qiita.com/minato-naka/items/afa4b930a2afac23261b]
+[参考記事](https://qiita.com/minato-naka/items/afa4b930a2afac23261b)
 
 `app/Services/SampleService.php`
 
