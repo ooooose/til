@@ -84,7 +84,7 @@ class StoreContactRequest extends FormRequest
 }
 ```
 ## Controllerに追加
-コントローラに上記Requestファイルを反映する。以下２ヶ所を変更・追加する。
+コントローラに上記Requestファイルを反映する。以下２ヶ所を変更・追加する。<br />
 `app/Http/Controllers/ContactFormController.php`
 ```
 <?php

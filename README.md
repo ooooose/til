@@ -14,7 +14,7 @@
 ```
 til
 ├ docker
-│ └ setup.md ★
+│ └ setup.md
 ├ git
 │ └ setup.md
 ├ laravel
@@ -23,9 +23,11 @@ til
 │ ├ RepositoryPattern.md ★
 │ ├ routes.md ★
 │ ├ setup.md ★
-│ └ validation.md ★
+│ └ validation.md
 └ mac
-　 └ setup.md ★
+│ └ setup.md ★
+└ vim
+　 └ setup.md
 ```
 
 ## 参考記事
