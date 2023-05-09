@@ -8,9 +8,9 @@ RepositoryとControllerの間に、ビジネスロジックを管理するため
 複雑なビジネスロジックをServiceに切り出し、Repositoryはデータの操作のみ行うように分離することで、Repositoryが複雑になることを防止する。<br />
 ビジネスロジックがそれほど複雑出ない場合、Service層を実装せずにControllerに実装する方法もあり。
 ### Repository
-DBの操作や外部APIによるデータ取得などのデータソースへのアクセス部分を記述する。
+DBの操作や外部APIによるデータ・通信や取得などのデータソースへのアクセス部分を記述する。
 ## ディレクトリ構造（完成形）
-appディレクトリ内にServiceとRepositoryを作成し、コントローラを修正する。
+appディレクトリ内にServiceとRepositoryを作成し、コントローラを修正する。<br />
 ※あくまでも、ファイル名は例で引用したもの。
 ```
 app
@@ -30,12 +30,12 @@ app
 　 └ SampleServiceInterface.php
 ```
 ## Serviceクラスの作成
-LaravelにはServiceディレクトリが最初は存在しないので、app配下に作成する。<br />
+LaravelにはServicesディレクトリが最初は存在しないので、app配下に作成する。<br />
 作成できたらインターフェイスと実装クラスを作成。<br />
 インターフェイスで定義されたメソッドは派生クラスで全て実装しなくてはならない。<br />
 このような実装を矯正することで、実装漏れを防ぎ、実行時に予期せぬエラーを防止することが可能になる。
 
-`app/Services/SampleServiceInterface.php`
+`app/Services/SampleServiceInterface.php`<br />
 `getSample()`を実装するにあたってインターフェースを定義する。
 ```
 <?php
@@ -51,7 +51,9 @@ LaravelにはServiceディレクトリが最初は存在しないので、app配
 
 `app/Services/SampleService.php`
 インターフェースで定義した`getSample()`を`SampleServiceクラス`で実装。
-この場合のメソッドの役割はコントローラでいうと何になるのか？★
+service層では、ビジネスロジックの記述に専念する。
+[ビジネスロジックとは](https://qiita.com/kiwatchi1991/items/cd3be76d70f6dfb1f366)<br />
+プレゼンテーション層・データアクセス層**以外**らしい。。
 ```
 <?php
     namespace App\Service;
@@ -69,8 +71,7 @@ LaravelにはServiceディレクトリが最初は存在しないので、app配
 ```
 
 ## Repositoryクラスの作成
-Service同様、インタフェースと実装クラスを作成する。
-
+Service同様、インタフェースと実装クラスを作成する。<br />
 `app/Repositories/SampleRepositoryInterface.php`
 実装するメソッド`getSampleById()`を先にインターフェースで定義する。
 ```
@@ -84,7 +85,7 @@ Service同様、インタフェースと実装クラスを作成する。
 ?>
 ```
 
-`app/Repositories/SampleRepository.php`
+`app/Repositories/SampleRepository.php`<br />
 Repositoryでは、データの操作という役割のみに集中するため、`Sample::find($id)`とEloquentへのアクセス処理のみメソッド内で実装する。
 ```
 <?php
@@ -133,7 +134,6 @@ ServiceクラスにはRepositoryのインターフェースを渡す。<br />
 
 `app/Services/SampleService.php`
 
-説明
 ```
 class SampleService implements SampleServiceInterface
 {
@@ -181,4 +181,10 @@ class SampleService implements SampleServiceInterface
     }
 ?>
 ```
+## 参考URL
+[LaravelでService層とRepository層を取り入れる](https://enjoyworks.jp/tech-blog/7743)
+[リポジトリパターンとLaravelアプリケーションでのディレクトリ構造](https://qiita.com/karayok/items/d7740ab2bd0adbab2e06)
+[【５分でざっくり理解！】Laravelでクリーンアーキテクチャ超入門](https://qiita.com/kiwatchi1991/items/cd3be76d70f6dfb1f366)
+[RepositoryパターンにおけるMVC＋Service＋Repositoryの役割をもう一回整理してみる](https://zenn.dev/naoki_oshiumi/articles/0467a0ecf4d56a)
+[PHP Dependency Injection依存性注入は難しくない](https://reffect.co.jp/php/dependency-injection-is-not-difficult)
 
