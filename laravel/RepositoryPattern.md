@@ -182,9 +182,233 @@ class SampleService implements SampleServiceInterface
 ?>
 ```
 ## 参考URL
-[LaravelでService層とRepository層を取り入れる](https://enjoyworks.jp/tech-blog/7743)
-[リポジトリパターンとLaravelアプリケーションでのディレクトリ構造](https://qiita.com/karayok/items/d7740ab2bd0adbab2e06)
-[【５分でざっくり理解！】Laravelでクリーンアーキテクチャ超入門](https://qiita.com/kiwatchi1991/items/cd3be76d70f6dfb1f366)
-[RepositoryパターンにおけるMVC＋Service＋Repositoryの役割をもう一回整理してみる](https://zenn.dev/naoki_oshiumi/articles/0467a0ecf4d56a)
-[PHP Dependency Injection依存性注入は難しくない](https://reffect.co.jp/php/dependency-injection-is-not-difficult)
+[LaravelでService層とRepository層を取り入れる](https://enjoyworks.jp/tech-blog/7743)<br />
+[リポジトリパターンとLaravelアプリケーションでのディレクトリ構造](https://qiita.com/karayok/items/d7740ab2bd0adbab2e06)<br />
+[【５分でざっくり理解！】Laravelでクリーンアーキテクチャ超入門](https://qiita.com/kiwatchi1991/items/cd3be76d70f6dfb1f366)<br />
+[RepositoryパターンにおけるMVC＋Service＋Repositoryの役割をもう一回整理してみる](https://zenn.dev/naoki_oshiumi/articles/0467a0ecf4d56a)<br />
+[PHP Dependency Injection依存性注入は難しくない](https://reffect.co.jp/php/dependency-injection-is-not-difficult)<br />
 
+## Practice
+入社課題でリポジトリパターンを練習したので、まとめてみる。<br />
+リポジトリは[こちら](https://github.com/ooooose/php_practice)。
+### ディレクトリ構造
+以下のディレクトリ構造とした。
+```
+app
+├ Console
+├ Exceptions
+├ Http
+│ ├ Controllers
+│ │ └ ContactController.php
+│ ├ Middleware	
+│ └ Requests
+├ Providers
+├ Repositories
+│ ├ ContactRepository.php
+│ └ ContactRepositoryInterface.php
+└ Services
+　 ├ ContactService.php
+　 └ ContactServiceInterface.php
+```
+### Repository層の実装
+`ContactRepositoryInterface.php`で以下のメソッドを定義。<br />
+Interfaceの性質上、定義したメソッドはリポジトリ層で実装しなくてはいけない。
+```ContactRepositoryInterface.php
+<?php
+declare(strict_types=1);
+
+namespace App\Repositories;
+
+use App\Models\Contact;
+use Illuminate\Database\Eloquent\Collection;
+
+/**
+ * Interface ContactRepository
+ * お問合せ（Contact）情報の操作を行うRepository
+ */
+interface ContactRepositoryInterface
+{
+    /**
+     * お問合せ部署を全て取得する。
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getDepartmentsIds(): Collection;
+
+    /**
+     * すべてのお問合せを取得する。
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getContactsColumns(): Collection;
+
+    /**
+     * お問合せ(Contact)を作成します
+     *
+     * @param int $department_id 部署ID
+     * @param string $name ユーザー名
+     * @param string $email メールアドレス
+     * @param string $content お問合せ内容
+     * @param int $age 年齢
+     * @param int $gender 性別
+     * @return Contact 作成したお問合せ
+     */
+    public function createContactInstance(int $department_id, string $name, string $email, string $content, int $age, int $gender): Contact;
+}
+```
+定義したメソッドは`ContactRepository.php`で実装する。
+```ContactRepository.php
+<?php
+declare(strict_types=1);
+
+namespace App\Repositories;
+
+use App\Models\Contact;
+use Illuminate\Database\Eloquent\Collection;
+
+/**
+ * Interface ContactRepository
+ * お問合せ（Contact）情報の操作を行うRepository
+ */
+interface ContactRepositoryInterface
+{
+    /**
+     * お問合せ部署を全て取得する。
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getDepartmentsIds(): Collection;
+
+    /**
+     * すべてのお問合せを取得する。
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getContactsColumns(): Collection;
+
+    /**
+     * お問合せ(Contact)を作成します
+     *
+     * @param int $department_id 部署ID
+     * @param string $name ユーザー名
+     * @param string $email メールアドレス
+     * @param string $content お問合せ内容
+     * @param int $age 年齢
+     * @param int $gender 性別
+     * @return Contact 作成したお問合せ
+     */
+    public function createContactInstance(int $department_id, string $name, string $email, string $content, int $age, int $gender): Contact;
+}
+```
+### Service層の実装
+こちらもRepository層と同様に、`ContactServiceInterface.php`と`ContactService.php`に分けて実装。<br />
+まずは必要なメソッドをInterfaceで定義する。
+```ContactServiceInterface.php
+<?php
+declare(strict_types=1);
+
+namespace App\Services;
+
+use App\Models\Contact;
+use Illuminate\Database\Eloquent\Collection;
+
+/**
+ * Interface ContactService
+ * お問合せ（Contact）に関するビジネスロジックを記載するService
+ */
+interface ContactServiceInterface
+{
+     /**
+     * お問合せ部署を全て取得する。
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getDepartments(): Collection;
+
+    /**
+     * すべてのお問合せを取得する。
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getContacts(): Collection;
+
+    /**
+     * お問合せ(Contact)を作成します
+     *
+     * @param int $department_id 部署ID
+     * @param string $name ユーザー名
+     * @param string $email メールアドレス
+     * @param string $content お問合せ内容
+     * @param int $age 年齢
+     * @param int $gender 性別
+     * @return Contact 作成したお問合せ
+     */
+    public function createContact(int $department_id, string $name, string $email, string $content, int $age, int $gender): Contact;
+
+    /**
+     * 性別の表示を「1,2,3」から「男性,女性,未回答」に変更する。
+     *
+     * @param $contacts 全お問合せ
+     *
+     * @return array $genders 性別
+     */
+    public function checkGenders($contacts): array;
+
+}
+```
+続いて`ContactService.php`に定義したメソッドを定義する。
+```ContactService.php
+<?php
+declare(strict_types=1);
+
+namespace App\Services;
+
+use App\Models\Contact;
+use Illuminate\Database\Eloquent\Collection;
+
+/**
+ * Interface ContactService
+ * お問合せ（Contact）に関するビジネスロジックを記載するService
+ */
+interface ContactServiceInterface
+{
+     /**
+     * お問合せ部署を全て取得する。
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getDepartments(): Collection;
+
+    /**
+     * すべてのお問合せを取得する。
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getContacts(): Collection;
+
+    /**
+     * お問合せ(Contact)を作成します
+     *
+     * @param int $department_id 部署ID
+     * @param string $name ユーザー名
+     * @param string $email メールアドレス
+     * @param string $content お問合せ内容
+     * @param int $age 年齢
+     * @param int $gender 性別
+     * @return Contact 作成したお問合せ
+     */
+    public function createContact(int $department_id, string $name, string $email, string $content, int $age, int $gender): Contact;
+
+    /**
+     * 性別の表示を「1,2,3」から「男性,女性,未回答」に変更する。
+     *
+     * @param $contacts 全お問合せ
+     *
+     * @return array $genders 性別
+     */
+    public function checkGenders($contacts): array;
+
+}
+```
+### Providerへの登録
+### Controllerに継承する。
