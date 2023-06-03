@@ -152,7 +152,7 @@ class SampleService implements SampleServiceInterface
 }
 ```
 
-同様にコントローラにServiceのインターフェースを渡すよう追加する。
+同様にコントローラにServiceのインターフェースを渡すよう追加する。<br />
 
 `app/Http/Controllers/SampleController.php`
 
@@ -411,4 +411,122 @@ interface ContactServiceInterface
 }
 ```
 ### Providerへの登録
+実装したRepository層とService層をProviderに登録する。<br />
+以下のコマンドを実行。今回は`ContactServiceProvider.php`を作成した。
+```
+php artisan make:provider ContactServiceProvider
+```
+以下のように記載して、Service層とRepository層の統合を行う。
+```
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use App\Repositories\ContactRepositoryInterface;
+use App\Repositories\ContactRepository;
+use App\Services\ContactServiceInterface;
+use App\Services\ContactService;
+
+class ContactServiceProvider extends ServiceProvider
+{
+    /**
+     * Register services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $this->app->bind(ContactRepositoryInterface::class, ContactRepository::class);
+        $this->app->bind(
+            ContactServiceInterface::class,
+            function ($app) {
+                return new ContactService(
+                    $app->make(ContactRepositoryInterface::class)
+                );
+            },
+        );
+    }
+
+    /**
+     * Bootstrap services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        //
+    }
+}
+```
 ### Controllerに継承する。
+Providerに登録したら、あとはコントローラに継承すればよい。<br />
+以下のとおり、`ContactController.php`に記述する。
+```
+<?php
+declare(strict_types=1);
+
+namespace App\Http\Controllers;
+
+use App\Services\ContactServiceInterface;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Requests\StoreContactRequest;
+
+class ContactController extends Controller
+{
+    private ContactServiceInterface $contactService;
+
+    public function __construct(ContactServiceInterface $contactService)
+    {
+        $this->contactService = $contactService;
+    }
+
+    /**
+     * お問合せの一覧を取得するメソッドです。
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $contacts = $this->contactService->getContacts();
+        $genders = $this->contactService->checkGenders($contacts);
+        return view('contacts.index', compact('contacts', 'genders'));
+    }
+
+    /**
+     * お問合せフォームを表示するためのメソッドです。
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        // セレクトボックス用に渡す変数を用意。
+        $departments = $this->contactService->getDepartments();
+        return view('contacts.create', compact('departments'));
+    }
+
+    /**
+     * お問合せフォームに入力したデータを保存するメソッドです。
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(StoreContactRequest $request)
+    {
+        DB::transaction(function () use ($request) {
+            $this->contactService->createContact(
+                (int) $request->department_id, 
+                $request->name, 
+                $request->email, 
+                $request->content, 
+                (int) $request->age, 
+                (int) $request->gender
+            );
+        });
+
+        return redirect()->route('index');
+    }
+}
+```
+以上。
