@@ -218,6 +218,87 @@ class Hoge(BaseModel):
 ```
 と書けば、値が1, 2, 3意外の値の場合エラーとなる。
 
+## 複雑なバリデーション
+`validator`を実装する。Validatorsに関するリンクは[こちら](https://docs.pydantic.dev/latest/usage/validators/)
+
+```
+from pydantic import BaseModel, Field, validator
+
+class Hoge(BaseModel):
+    hoge: Optional[int]
+
+    @validator(プロパティ名) 
+    def validate_hoge(cls, value, values):
+        if ここでチェック:
+            raise ValueError("何かのメッセージ") 
+        return value
+
+```
+- プロパティ名を**@validator**デコレーターに指定するとそのプロパティがチェックされる。
+- **@validator**デコレーターに`each_item=True`を設定すると、チェックしたい`List`や`Dict`などのコレクションの場合、要素一つひとつについてバリデートできる。
+- validatorの関数名は任意のものでよい。
+- validatorの関数の第1、第2引数は固定、第3引数以降は任意だが、`values`という名前の引数を定義すると、そのプロパティより前にバリデートされたプロパティの辞書が入ってくる。
+    - これを使用して相関チェックできる
+- `raise`できる例外クラスは`TypeError`か`ValueError`。
+    - `raise`せずに`assert`を使って`AssertionError`を投げても問題ない。
+
+## Pydanticでは実装できないバリデーション
+データベースの内容との相関チェックはPydantic単体ではバリデーションできない。<br />
+そのため、パスオペレーション関数（`@app.get(...)`とかつけた関数）の先頭でチェックする。<br />
+
+
+例えば、リクエストボディが次のような形式だとして`qux`にエラーがあった場合は次のように返却する。
+
+```
+{
+    "foo": {
+        "bar": 123,
+        "baz": {
+            "qux": "errrrrrr"  // これがエラーとする
+        }
+    }
+}
+
+```
+
+
+```
+from fastapi.exceptions import RequestValidationError
+from pydantic.error_wrappers import ErrorWrapper
+
+# ...中略...
+
+if エラー判定:
+    raise RequestValidationError(
+        [ErrorWrapper(ValueError("エラーメッセージをどうぞ"), ("body", "foo", "baz", "qux"))]
+    )
+
+```
+
+`RequestValidationError`を利用することで他のバリデーションエラーと同じ形式で出力される。<br />
+
+
+エラーレスポンスは次のようになる。
+
+- `422 Unprocessable Entity`
+
+```
+{
+  "detail": [
+    {
+      "loc": [
+        "body",
+        "foo",
+        "bar",
+        "qux"
+      ],
+      "msg": "エラーメッセージをどうぞ",
+      "type": "value_error"
+    }
+  ]
+}
+
+```
 
 
 # 参考文献
