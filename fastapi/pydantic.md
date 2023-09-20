@@ -1,6 +1,5 @@
 # pydanticについて
 ## Pydanticとは
-
 Pythonの型アノテーションを利用して、実行時における型ヒントを提供したり、データのバリデーション時のエラー設定を簡単に提供してくれるライブラリ。<br />
 
 
@@ -299,6 +298,12 @@ if エラー判定:
 }
 
 ```
+
+## 例外クラスと`type`についての詳細
+- `ErrorWrapper`に指定できる例外クラスは`@validator`で`raise`できるものと同じである。
+- `ValueError`の場合、レスポンスに出力される`type`は`value_error`となる。
+- `TypeError`の場合、レスポンスに出力される`type`は`type_error`となる。
+- `ValueError`のサブクラスを実装し、クラス変数として`code="piyopiyo"`を定義すると、レスポンスに出力される`type`は`value_error.piyopiyo`となる。
 
 
 # 参考文献
