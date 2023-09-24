@@ -25,6 +25,39 @@ class User(BaseModel):
 
 BaseModelを継承してモデルの型を定義することが可能。
 
+### BaseModelとは
+PydanticのBaseModelを継承したクラスでデータを定義することでクラス変数に定義した型ヒントとインスタンス作成時に指定された値の型を比較し、正しい型なのかどうかをバリデーションしてくれる。<br />
+型ヒント以外にも、独自のバリデーションルールを定義することが可能<br />
+以下実装例<br />
+
+
+```
+from pydantic import BaseModel
+
+
+class Service(BaseModel):
+    service_id: int
+    name: str
+
+    # 独自のバリデーションルール
+    @validator("name")
+    def name_has_service(cls, v):
+        if "Service" not in v:
+            raise ValueError("name must have 'Service'")
+        return v
+
+Service(service_id=1, name="Service A")
+# > OK
+
+Service(service_id="a", name="Service A")
+# > ValidationError
+
+Service(service_id=1, name="A")
+# > ValidationError
+
+```
+
+
 ### 型
 型とは、Pythonの型ヒントを使って記述する。一般的なものは以下のとおり。
 
@@ -41,7 +74,8 @@ BaseModelを継承してモデルの型を定義することが可能。
 | Set        | セット       | array(uniqueitems=trueとなる)  |
 | Dict       | 辞書         | object                         |
 
-また、次のものはdatetimeモジュールをimportして型に指定できる。
+また、次のものはdatetimeモジュールをimportして型に指定できる。<br />
+
 | 型                  | 説明            |
 |:--------------------|:----------------|
 | datetime.date       | 日付            |
@@ -306,5 +340,16 @@ if エラー判定:
 - `ValueError`のサブクラスを実装し、クラス変数として`code="piyopiyo"`を定義すると、レスポンスに出力される`type`は`value_error.piyopiyo`となる。
 
 
+
+## Pydantic v2でモデルのバリデーションが高速化されているらしい。
+
+Pydantic v2では、バリデーション部分の実装をRustで書き直し、pydantic-coreという別のパッケージに分離されている。これにより、v1と比較して、4~50倍バリデーション処理が高速化されたと[公式ページ](https://docs.pydantic.dev/latest/blog/pydantic-v2/#performance)で言及されている。<br />
+
+
 # 参考文献
+
+
 [Qiita記事](https://qiita.com/uenosy/items/2f6b1aa258018d3db76c)
+
+
+[Safie Engineers' Blog!](https://engineers.safie.link/entry/2023/07/05/fastapi-pydantic-v2)
