@@ -234,7 +234,7 @@ class TestCreateXxx:
 testclientを使用して、apiにアクセスした場合のレスポンスコードや正しいデータが帰ってきているか確認することができる。<br />
 
 
-```:python
+```:python/test.py
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session
