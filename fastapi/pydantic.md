@@ -339,6 +339,48 @@ if エラー判定:
 - `TypeError`の場合、レスポンスに出力される`type`は`type_error`となる。
 - `ValueError`のサブクラスを実装し、クラス変数として`code="piyopiyo"`を定義すると、レスポンスに出力される`type`は`value_error.piyopiyo`となる。
 
+## 読み取り用のPydanticモデルとしての設定（`orm_mode`）
+読み取り用のPydanticモデルに、`Config`クラスを追加し、`orm_mode = True`と設定する。<br />
+書き込み用と読み込み用とで型を分けるという特徴がある。<br />
+
+```python
+from pydantic import BaseModel
+
+
+class ItemBase(BaseModel):
+    title: str
+    description: str | None = None
+
+
+class ItemCreate(ItemBase):
+    pass
+
+
+class Item(ItemBase):
+    id: int
+    owner_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class UserBase(BaseModel):
+    email: str
+
+
+class UserCreate(UserBase):
+    password: str
+
+
+class User(UserBase):
+    id: int
+    is_active: bool
+    items: list[Item] = []
+
+    class Config:
+        orm_mode = True
+
+```
 
 
 ## Pydantic v2でモデルのバリデーションが高速化されているらしい。
