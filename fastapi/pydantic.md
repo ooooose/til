@@ -10,7 +10,7 @@ SQLAlchemyのデータベースモデルを定義する際に役立つとのこ�
 定義例は以下のとおり。
 
 
-```
+```python
 from datetime import datetime
 from typing import List
 from pydantic import BaseModel
@@ -31,7 +31,7 @@ PydanticのBaseModelを継承したクラスでデータを定義することで
 以下実装例<br />
 
 
-```
+```python
 from pydantic import BaseModel
 
 
@@ -94,7 +94,7 @@ Service(service_id=1, name="A")
 プロパティの必須チェックには次の４パターンの類型がある。
 
 ### 厳密な必須チェック（プロパティが存在し、値が`None`ではない）
-```
+```python
 from pydantic import BaseModel
 
 class Hoge(BaseModel):
@@ -110,7 +110,7 @@ class Hoge(BaseModel):
 
 ### 緩い必須チェック（プロパティが存在すれば、値自体`None`でもいい）
 
-```
+```python
 from pydantic import BaseModel, Field
 
 class Hoge(BaseModel):
@@ -125,7 +125,7 @@ class Hoge(BaseModel):
 
 ### 必須チェックなし（プロパティが存在しなくてもいい）
 
-```
+```python
 from pydantic import BaseModel, Field
 
 class Hoge(BaseModel):
@@ -139,7 +139,7 @@ class Hoge(BaseModel):
 ### 値が必要なオプション（プロパティは存在しなくてもいいが、存在するなら`null`ではダメなもの）
 
 以下のように冗長な書き方が必要になる。
-```
+```python
 from pydantic import BaseModel, Field, validator
 
 class Hoge(BaseModel):
@@ -158,7 +158,7 @@ class Hoge(BaseModel):
 - `hoge` が整数ではない
 
 ## デフォルト値
-```
+```python
 from pydantic import BaseModel, Field
 
 class Hoge(BaseModel):
@@ -179,7 +179,7 @@ class Hoge(BaseModel):
 ### 文字列の長さ
 
 
-```
+```python
 from pydantic import BaseModel, Field
 
 class Hoge(BaseModel):
@@ -192,7 +192,7 @@ class Hoge(BaseModel):
 
 ### リストの要素数
 
-```
+```python
 from pydantic import BaseModel, Field
 
 class Hoge(BaseModel):
@@ -204,7 +204,7 @@ class Hoge(BaseModel):
 
 ### 正規表現
 
-```
+```python
 from pydantic import BaseModel, Field
 
 class Hoge(BaseModel):
@@ -219,7 +219,7 @@ class Hoge(BaseModel):
 ### 数値の範囲
 
 
-```
+```python
 from pydantic import BaseModel, Field
 
 class Hoge(BaseModel):
@@ -236,7 +236,7 @@ class Hoge(BaseModel):
 
 ### コード定義
 
-```
+```python
 from enum import Enum
 from pydantic import BaseModel, Field
 
@@ -254,7 +254,7 @@ class Hoge(BaseModel):
 ## 複雑なバリデーション
 `validator`を実装する。Validatorsに関するリンクは[こちら](https://docs.pydantic.dev/latest/usage/validators/)
 
-```
+```python
 from pydantic import BaseModel, Field, validator
 
 class Hoge(BaseModel):
@@ -282,7 +282,7 @@ class Hoge(BaseModel):
 
 例えば、リクエストボディが次のような形式だとして`qux`にエラーがあった場合は次のように返却する。
 
-```
+```python
 {
     "foo": {
         "bar": 123,
@@ -295,7 +295,7 @@ class Hoge(BaseModel):
 ```
 
 
-```
+```python
 from fastapi.exceptions import RequestValidationError
 from pydantic.error_wrappers import ErrorWrapper
 
@@ -315,7 +315,7 @@ if エラー判定:
 
 - `422 Unprocessable Entity`
 
-```
+```python
 {
   "detail": [
     {
@@ -388,10 +388,46 @@ class User(UserBase):
 Pydantic v2では、バリデーション部分の実装をRustで書き直し、pydantic-coreという別のパッケージに分離されている。これにより、v1と比較して、4~50倍バリデーション処理が高速化されたと[公式ページ](https://docs.pydantic.dev/latest/blog/pydantic-v2/#performance)で言及されている。<br />
 
 
+## orm_modeとは
+Pydanticの型と同時に以下のように設定するとデータを読み取る際に便利。<br />
+
+```python
+
+from typing import List, Optional
+
+from pydantic import BaseModel
+
+# 省略
+
+class User(UserBase):
+    id: int
+    is_active: bool
+    items: List[Item] = []
+
+    class Config:
+        orm_mode = True
+
+```
+これによりレスポンスとして受け取ったデータから値を取得する際直感的に取得できる。<br />
+
+例えば、以下のようなコードで表現するところを<br />
+
+```python
+id = data["id"]
+```
+以下のように表現できる。<br />
+
+```python
+id = data.id
+```
+
+一般的には読取用として`orm_mode=True`として、データ登録用と分けてPydanticに定義する例が多い。<br />
+上記の例だと、書込用は`User`、読込用として`UserOrm`を定義すると言った感じ。<br />
+
+
 # 参考文献
 
 
-[Qiita記事](https://qiita.com/uenosy/items/2f6b1aa258018d3db76c)
+- [Qiita記事](https://qiita.com/uenosy/items/2f6b1aa258018d3db76c)
+- [Safie Engineers' Blog!](https://engineers.safie.link/entry/2023/07/05/fastapi-pydantic-v2)
 
-
-[Safie Engineers' Blog!](https://engineers.safie.link/entry/2023/07/05/fastapi-pydantic-v2)
