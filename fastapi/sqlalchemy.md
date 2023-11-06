@@ -256,6 +256,55 @@ ORMではテーブルごとにPythonのクラスを用意し、そのインス�
 ## Coreを使ったDB操作
 続きもまとめる。
 
+# トランザクションについて
+トランザクションとは、開始してから更新処理を行い、コミットまたはロールバックを行うまでの一連の処理単位のことを指す。<br />
+SQLAlchemyではSessionオブジェクトのメソッドを呼んで操作する。<br />
+例えば、以下のような記載方法がある。<br />
+
+```python
+session.add(some_object())
+session.add(some_other_object())
+
+session.commit()  # コミットする
+# 本当は try/except/finally でロールバックや close をする必要がある
+```
+その他にも`context manager`を使う方法がある。<br />
+
+```python
+with session.begin():
+    session.add(some_object())
+    session.add(some_other_object())
+# コンテキストから抜けるとき（トランザクションの終了時）にコミットされる
+# エラーが起こったらロールバックされる
+```
+## 最後に`session.close()`をする重要性
+トランザクションは`commit()`もしくは`rollback()`が正常に実行されないと終了しない。<br />
+一方で、仮に`commit()`が適切に実行されず、エラーになってしまった場合、トランザクションは終了せず、以下のエラーがで続けるケースがある。<br />
+
+```
+sqlalchemy.exc.PendingRollbackError: This Session's transaction has been rolled back due to a previous exception during flush. To begin a new transaction with this Session, first issue Session.rollback().
+```
+
+上記のようなエラーを回避するためには必ずsessionが`close()`されるようにしなければならない。<br />
+実装の一例として、以下のようにすることで処理が成功しようが失敗しようが最終的には`close()`が実行され、トランザクションが正常に終了される。<br />
+
+```python
+DATABASE_URL = "postgresql://postgres:password@postgres-db:5432/postgres"
+
+engine = create_engine(DATABASE_URL)
+
+Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def session_factory():
+    session = Session()
+    try:
+        yield session 
+    finally:
+        session.close()
+```
+もう少しエラーハンドリングできる余地はあるが、上記のように実装すれば、トランザクションは必ず終了することが担保される。<br />
+
+
 
 # 参考文献
 [SQLAlchemyの基本的な使い方](https://qiita.com/arkuchy/items/75799665acd09520bed2)
