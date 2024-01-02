@@ -197,3 +197,59 @@ return (
 Reactは、後でアイテムを挿入、削除、並び替えることがあった際に、何が起こったかを`key`を使って把握する。<br />
 
 ## イベントに応答
+コンポーネントの中で*イベントハンドラ関数*を宣言することで、イベントにも応答可能。<br />
+
+```javascript
+function MyButton() {
+  function handleClick() {
+    alert('You clicked me!');
+  }
+
+  return (
+    <button onClick={handleClick}>
+      Click me
+    </button>
+  );
+}
+```
+
+`onClick={handleClike}`の末尾には括弧がないことに注意。<br />
+これはイベントハンドラ関数を呼び出すわけでなく、渡すだけであり、ユーザーがボタンをクリックした時に、Reactがイベントハンドラを呼び出す。<br />
+
+## 画面の更新
+コンポーネントに情報を記憶させて表示したいことがある。<br />
+この場合にコンポーネントに*State*を追加する。<br />
+
+まず、Reactから`useState`をインポートする。<br />
+
+```javascript
+import { useState } from 'react';
+```
+
+これにより、コンポーネント内にstate変数を宣言することができる。<br />
+
+```javascript
+function MyButton() {
+  const [count, setCount] = useState(0);
+  // ...
+```
+
+`useState`からは現在のstateと、それを更新するための関数の2つが得られる。<br />
+命名的な慣習としては`[something, setSomething]`のように記述する。<br />
+
+## フックの使用
+`use`で始まる関数は、フック（Hook）と呼ばれる。<br />
+`useState`はReactが提供する組み込みのフック。<br />
+[APIリファレンス](https://ja.react.dev/reference/react)で他の組み込みフックをみることも可能。<br />
+また、既存のフックを組み合わせて独自のフックを作成することもできる。<br />
+
+フックには通常の関数より多くの制限がある。<br />
+- フックはコンポーネントの*トップレベル*でのみ呼び出すことができる。
+- 条件分岐やループの中で`useState`を使いたい場合は、新しいコンポーネントを抽出してそこに配置する。
+
+
+## コンポーネント間でデータを共有
+`state`などをコンポーネント間で共有し、常に一緒に更新したいということもよくある。<br />
+この場合、上位のコンポーネントに`state`の定義を移動し、*props*としてデータ（`state`）の受け渡しを行うことができる。<br />
+これは更新関数も同様。<br />
+
