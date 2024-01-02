@@ -253,3 +253,102 @@ function MyButton() {
 この場合、上位のコンポーネントに`state`の定義を移動し、*props*としてデータ（`state`）の受け渡しを行うことができる。<br />
 これは更新関数も同様。<br />
 
+# UIの記述
+
+## コンポーネント：UIの構成部品
+サイドバー、アバター、モーダル、ドロップダウンといったあらゆるUIパーツの裏側では、マークアップがスタイルのためのCSSやユーザー対話のためのJavaScriptと組み合わさりながら働いている。<br />
+Reactでは、マークアップ・CSS・JSを独自の"コンポーネント"と呼ばれる、**アプリのための再利用可能なUI要素**にまとめることができる。<br />
+プロジェクトが成長するとともに、設計・デザインの色々な部分を既に描いたコンポーネントを再利用することで構築できるようになり、改発速度がアップする。<br />
+
+## コンポーネントの定義
+コンポーネントとは、**マークアップを添えることができるJavaScript関数**らしい。<br />
+以下のようなコードで実装する。<br />
+
+```javascript
+export default function Profile() {
+  return (
+    <img
+      src="https://i.imgur.com/MK3eW3Am.jpg"
+      alt="Katherine Johnson"
+    />
+  )
+}
+```
+以下のように作成する。
+### コンポーネントをエクスポート
+頭にある`export default`は標準的なJS構文であり、これによりファイル内のメインの関数をマークし、後で他のファイルからそれをインポートできるようにしている。<br />
+
+### 関数を定義
+`function Profile() {}`のように書くことで`Profile`という名前のJavaScript関数を定義。<br />
+
+> [!NOTE]
+> Reactコンポーネントは普通のJavaScript関数ですが、**名前は大文字から始める必要がある**
+> でないと機能しないので注意が必要。
+
+
+### マークアップを加える
+上記コードのコンポーネントは`src`と`alt`という属性を有する`<img />`タグを返しているが、HTMLのように書かれているものの、裏では実際にはJavaScript。<br />
+この構文は`JSX`と呼ばれるもので、これによりマークアップをJavaScriptないに埋め込めるようになる。<br />
+return文は、以下のように一行にまとめても問題はない。<br />
+
+```javascript
+return <img src="https://i.imgur.com/MK3eW3As.jpg" alt="Katherine Johnson" />;
+```
+
+しかし、returnキーワード同じ行にマークアップ全体が収まらない場合は、**括弧で囲んで以下のように記述する必要がある。**
+
+```javascript return (
+  <div>
+    <img src="https://i.imgur.com/MK3eW3As.jpg" alt="Katherine Johnson" />
+  </div>
+);
+```
+
+> [!NOTE]
+> 括弧がないと、`return`の後にあるコードは全て無視されてしまう。
+
+
+## コンポーネントを使う。
+`Profile`コンポーネントが定義できたので、それを他のコンポーネント内にネストさせることができる。<br />
+例えば、`Profile`コンポーネントを複数回使う`Gallery`というコンポーネントをエクスポートすることが可能。<br />
+
+```javascript
+function Profile() {
+  return (
+    <img
+      src="https://i.imgur.com/MK3eW3As.jpg"
+      alt="Katherine Johnson"
+    />
+  );
+}
+
+export default function Gallery() {
+  return (
+    <section>
+      <h1>Amazing scientists</h1>
+      <Profile />
+      <Profile />
+      <Profile />
+    </section>
+  );
+}
+```
+
+## ブラウザに見えるもの
+
+大文字・小文字の違いには気を付けること。<br />
+- `<section>`は小文字なので、ReactはこれがHTMLタグを指していると理解する。
+- `<Profile />`は大文字の`P`で始まっているので、Reactは`Profile`という名前の独自コンポーネントを使うのだと理解する。
+
+`Profile`の中には`<img />`というHTMLがさらに含まれている。最終的にブラウザに見えるのは以下のマークダウンになる。
+```html
+<section>
+  <h1>Amazing scientists</h1>
+  <img src="https://i.imgur.com/MK3eW3As.jpg" alt="Katherine Johnson" />
+  <img src="https://i.imgur.com/MK3eW3As.jpg" alt="Katherine Johnson" />
+  <img src="https://i.imgur.com/MK3eW3As.jpg" alt="Katherine Johnson" />
+</section>
+```
+
+## コンポーネントのネストと整理方法
+
