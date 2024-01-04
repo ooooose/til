@@ -379,8 +379,34 @@ export default function Gallery() {
 - Reactでは、**アプリのための再利用可能な部品**であるコンポーネントを作成することができる。
 - Reactアプリでは、UIのあらゆる部品はコンポーネントである。
 - Reactのコンポーネントとは普通のJS関数だが、以下の点が異なる。
-  1. 名前は常に大文字で始まる。
-  2. JSXマークアップをreturnする。
+  - 名前は常に大文字で始まる。
+  - JSXマークアップを`return`する。
 
 # コンポーネントのインポートとエクスポート
+## ルートコンポーネントファイル
+
+```javascript
+function Profile() {
+  return (
+    <img
+      src="https://i.imgur.com/MK3eW3As.jpg"
+      alt="Katherine Johnson"
+    />
+  );
+}
+
+export default function Gallery() {
+  return (
+    <section>
+      <h1>Amazing scientists</h1>
+      <Profile />
+      <Profile />
+      <Profile />
+    </section>
+  );
+}
+```
+
+
+上記のファイル自体は`App.js`というファイルにあるため、**ルート（root）コンポーネントファイル**に置かれていることになる。<br />
 
