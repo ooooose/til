@@ -409,4 +409,122 @@ export default function Gallery() {
 
 
 上記のファイル自体は`App.js`というファイルにあるため、**ルート（root）コンポーネントファイル**に置かれていることになる。<br />
+Next.jsのようなファイルベースのルーティングがあるフレームワークの場合、ルートコンポーネントはページごとに異なるものになる。<br />
+
+
+## コンポーネントのエクスポートとインポート
+コンポーネントは**デフォルトエクスポート**あるいは、**名前付きエクスポート**のいずれかを使い、関数コンポーネントをそのファイルからエクスポートする。<br />
+利用する側のファイルでは、エスクポートされたコンポーネントファイルをインポートする。<br />
+デフォルトエクスポートされたのか、名前付きエクスポートされたのかに応じて対応するインポート手法を採る。<br />
+
+
+> [!NOTE]
+> `.js`というファイル拡張子が省略された、以下のようなファイルがあるが、Reactでは`./Gallery.js`でも`./Gallery`でも動作する。
+> 前者の方が*ネイティブESモジュールの動作*により近い方法らしい。
+
+# JSXでマークアップを記述する
+
+## HTMLをJSXに変換する
+以下HTMLがあるとする。<br />
+
+```html
+<h1>Hedy Lamarr's Todos</h1>
+<img 
+  src="https://i.imgur.com/yXOvdOSs.jpg" 
+  alt="Hedy Lamarr" 
+  class="photo"
+>
+<ul>
+    <li>Invent new traffic lights
+    <li>Rehearse a movie scene
+    <li>Improve the spectrum technology
+</ul>
+```
+
+これをコンポーネントの中に入れたいとする。<br />
+
+```javascript
+export default function TodoList() {
+  return (
+    // ???
+  )
+}
+```
+`???`の箇所にコピペしてもうまく動かないらしい。<br />
+JSXの方が厳密であり、HTMLよりも若干ルールが多いという理由によるもの。<br />
+```javascript
+export default function TodoList() {
+  return (
+    // This doesn't quite work!
+    <h1>Hedy Lamarr's Todos</h1>
+    <img 
+      src="https://i.imgur.com/yXOvdOSs.jpg" 
+      alt="Hedy Lamarr" 
+      class="photo"
+    >
+    <ul>
+      <li>Invent new traffic lights
+      <li>Rehearse a movie scene
+      <li>Improve the spectrum technology
+    </ul>
+  );
+}
+```
+## JSXのルール
+### 単一のルート要素を返す。
+コンポーネントから複数の要素を返すには、**それを単一の親タグで囲む。**<br />
+例えば、`<div>`を使うことができる。
+
+```html
+<div>
+  <h1>Hedy Lamarr's Todos</h1>
+  <img 
+    src="https://i.imgur.com/yXOvdOSs.jpg" 
+    alt="Hedy Lamarr" 
+    class="photo"
+  >
+  <ul>
+    ...
+  </ul>
+</div>
+```
+マークアップに余分な`<div>`を加えたくない場合は、代わりに`<>`と`</>`を使うことができる。<br />
+
+```html
+<>
+  <h1>Hedy Lamarr's Todos</h1>
+  <img 
+    src="https://i.imgur.com/yXOvdOSs.jpg" 
+    alt="Hedy Lamarr" 
+    class="photo"
+  >
+  <ul>
+    ...
+  </ul>
+</>
+```
+
+この中身のないタグは*フラグメント(Fragment)*と呼ばれるものであり、フラグメントを使えば、ブラウザのHTMLツリーに痕跡を残すことなく、複数の要素をまとめることが可能。<br />
+
+### 全てのタグを閉じる。
+
+JSXではすべてのタグを明示的に閉じる必要がある。<br />
+`<img>`のような自動で閉じるタグは`<img />`のようになる。`<li>oranges`のような囲みタグは`<li>oranges</li>`と書かなくてはならない。<br />
+
+```html
+<>
+  <img 
+    src="https://i.imgur.com/yXOvdOSs.jpg" 
+    alt="Hedy Lamarr" 
+    class="photo"
+   />
+  <ul>
+    <li>Invent new traffic lights</li>
+    <li>Rehearse a movie scene</li>
+    <li>Improve the spectrum technology</li>
+  </ul>
+</>
+```
+
+### （ほぼ）すべてキャメルケースで書く
 
