@@ -527,4 +527,32 @@ JSXではすべてのタグを明示的に閉じる必要がある。<br />
 ```
 
 ### （ほぼ）すべてキャメルケースで書く
+JSXはJavaScriptに変換され、中に書かれた属性はJavaScriptオブジェクトのキーになる。<br />
+コンポーネント内では、これらの属性を変数に読み出したくなることがあるが、JavaScriptの変数名には一点の制約がある。<br />
+例えば、名前にハイフンを含めたり、`class`のような予約語を使ったりすることはできない。<br />
+
+Reactでは多くのHTMLやSVGの属性はキャメルケースで書かれる。<br />
+例えば、`stroke-width`の代わりに`strokeWidth`を使う。`class`は予約語なので、reactでは`className`を使う。<br />
+
+
+```javascript
+<img 
+  src="https://i.imgur.com/yXOvdOSs.jpg" 
+  alt="Hedy Lamarr" 
+  className="photo"
+/>
+```
+
+全リストは[ReactDOMコンポーネントに存在する属性の一覧](https://ja.react.dev/reference/react-dom/components/common)にある。
+
+> [!NOTE]
+> 歴史的理由により`aria-*`や`data-*`属性はHTML属性と同じようにハイフン付きで書くことになっている。
+
+
+## まとめ
+- レンダリングロジックとマークアップは互いに関連しているので、Reactではそれらをグループ化する。
+- JSXはHTMLと似ているがいくつか違いがある。
+- エラーメッセージを見れば、大概はマークアップの修正方法について指針が得られる。
+
+# JSXに波括弧でJavaScriptを含める
 
