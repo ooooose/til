@@ -560,3 +560,81 @@ JSXでJavaScriptファイル内にHTMLにようなマークアップを書いて
 この場合、JSX内で波括弧を使うことでJavaScriptを使用することができる。<br />
 
 ## 引用符で文字列を渡す
+JSXに文字列の属性を渡したい場合、シングルクオートがダブルクオートで囲む。<br />
+
+```javascript
+export default function Avatar() {
+  return (
+    <img
+      className="avatar"
+      src="https://i.imgur.com/7vQD0fPs.jpg"
+      alt="Gregorio Y. Zara"
+    />
+  );
+}
+```
+
+この`src`や`alt`のテキストを動的に指定したい場合は、クオーテーションを`{}`に置き換えることで、JavaScriptの値を使うことができる。<br />
+
+```javascript
+export default function Avatar() {
+  const avatar = 'https://i.imgur.com/7vQD0fPs.jpg';
+  const description = 'Gregorio Y. Zara';
+  return (
+    <img
+      className="avatar"
+      src={avatar}
+      alt={description}
+    />
+  );
+}
+```
+
+上記波括弧を使うことで、マークアップの中で直接JavaScriptを使えるようになる。<br />
+
+## 波括弧を使える場所
+JSX内部で波括弧を使う方法は2つだけ。<br />
+
+- **テキストとして**、JSXタグの中で直接つかう。
+> [!NOTE] `<h1>{name}'s To Do List</h1>`は動作するが、`<{tag}>Gregorio Y. Zara's To Do List</{tag}>`は動作しない。
+- **属性として**、`=`記号の直後に使う。
+> [!NOTE] `src={avatar}`は`avatar`というヘンスを読み出すが、`src="{avatar}"`と書くと"{avatar}"という文字列そのものを渡す。
+
+
+## 「ダブル波括弧」でJSX内にCSSやその他のオブジェクトを含める
+
+文字列や数字、その他のJavaScriptの式に加えて、オブジェクトをJSXに渡すことも可能。<br />
+オブジェクトも波括弧を使って`{ name: "Hedy Lamarr", inventions: 5 }`のように記述するので、これをJSXに渡す時には別の波括弧のペアでラップして`person={{ name: "Hedy Lamarr", inventions: 5 }}`のようにする必要がある。<br />
+
+JSX内でインラインのCSSスタイルを使う時にも`style`属性にオブジェクトを渡す。
+
+```javascript
+export default function TodoList() {
+  return (
+    <ul style={{
+      backgroundColor: 'black',
+      color: 'pink'
+    }}>
+      <li>Improve the videophone</li>
+      <li>Prepare aeronautics lectures</li>
+      <li>Work on the alcohol-fuelled engine</li>
+    </ul>
+  );
+}
+```
+`{{}}`とみた時には、JSXの波括弧の中に書かれたオブジェクトに過ぎないという認識が重要。<br />
+
+> [!NOTE]
+> インラインの`style`属性はキャメルケースで書く。
+> 例えばHTMLで`<ul style="background-color: black">`となっていれば、コンポーネントでは`<ul style={{ backgroundColor: 'black' }}>`となる。
+
+## まとめ
+- 引用符内に書かれたJSX属性は文字列として渡される。
+- 波括弧を使えばJavaScriptのロジックや変数をマークアップ内に含めることができる。
+- 波括弧はタグのコンテンツの中に使うか、属性の場合は`=`の直後で使う。
+- `{{}}`は特別な構文ではなく、JSXの波括弧にくっつくように書かれたJavaScriptオブジェクトである。
+
+# コンポーネントにpropsを渡す
+## propsとは
+
+
