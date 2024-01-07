@@ -596,9 +596,9 @@ export default function Avatar() {
 JSX内部で波括弧を使う方法は2つだけ。<br />
 
 - **テキストとして**、JSXタグの中で直接つかう。
-> [!NOTE] `<h1>{name}'s To Do List</h1>`は動作するが、`<{tag}>Gregorio Y. Zara's To Do List</{tag}>`は動作しない。
+`<h1>{name}'s To Do List</h1>`は動作するが、`<{tag}>Gregorio Y. Zara's To Do List</{tag}>`は動作しない。
 - **属性として**、`=`記号の直後に使う。
-> [!NOTE] `src={avatar}`は`avatar`というヘンスを読み出すが、`src="{avatar}"`と書くと"{avatar}"という文字列そのものを渡す。
+`src={avatar}`は`avatar`というヘンスを読み出すが、`src="{avatar}"`と書くと"{avatar}"という文字列そのものを渡す。
 
 
 ## 「ダブル波括弧」でJSX内にCSSやその他のオブジェクトを含める
