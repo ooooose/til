@@ -636,5 +636,163 @@ export default function TodoList() {
 
 # コンポーネントにpropsを渡す
 ## propsとは
+propsとはJSXタグに渡す情報のこと。<br />
+例えば、`className`、`src`、`alt`、`width`や`height`は`<img>`に渡すことができるpropsである。<br />
+
+```javascript
+function Avatar() {
+  return (
+    <img
+      className="avatar"
+      src="https://i.imgur.com/1bX5QH6.jpg"
+      alt="Lin Lanying"
+      width={100}
+      height={100}
+    />
+  );
+}
+
+export default function Profile() {
+  return (
+    <Avatar />
+  );
+}
+```
+しかし、`<Avatar />`のような独自のコンポーネントの場合は、任意のpropsを渡してそれをカスタマイズすることが可能。<br />
+
+
+## コンポーネントにpropsを渡す
+以下のコードでは、`Profile`コンポーネントは子コンポーネントである`<Avatar>`に何のpropsも渡していない。<br />
+
+```javascript
+export default function Profile() {
+  return (
+    <Avatar />
+  );
+}
+```
+以下の2ステップで`Avatar`にpropsを与えることが可能。<br />
+
+### Step 1: 子コンポーネントにpropsを渡す
+まず、`Avatar`に何かのpropsを渡す。<br />
+今回は、`person`（オブジェクト）と`size`（数字）を渡してみる。<br />
+
+```javascript
+export default function Profile() {
+  return (
+    <Avatar
+      person={{ name: 'Lin Lanying', imageId: '1bX5QH6' }}
+      size={100}
+    />
+  );
+}
+```
+
+これでpropsを`Avatar`コンポーネント内から読み出せるようになる。<br />
+
+### Step 2: 子コンポーネントからpropsを読み出す
+これらのpropsを読み出すには、`function Avatar`の直後の`({})`内で、コンマで区切って`person, size`のように名前を指定する。<br />
+これにより、`Avatar`のコード内で変数と同じようにこれらのpropsが支えるようになる。<br />
+
+```javascript
+function Avatar({ person, size }) {
+  // person and size are available here
+}
+```
+
+`Avatar`内に、`person`や`size`を使って何かをレンダーするロジックを書き加えれば完成。<br />
+
+```javascript
+import { getImageUrl } from './utils.js';
+
+function Avatar({ person, size }) {
+  return (
+    <img
+      className="avatar"
+      src={getImageUrl(person)}
+      alt={person.name}
+      width={size}
+      height={size}
+    />
+  );
+}
+
+export default function Profile() {
+  return (
+    <div>
+      <Avatar
+        size={100}
+        person={{ 
+          name: 'Katsuko Saruhashi', 
+          imageId: 'YfeOqp2'
+        }}
+      />
+      <Avatar
+        size={80}
+        person={{
+          name: 'Aklilu Lemma', 
+          imageId: 'OKS67lh'
+        }}
+      />
+      <Avatar
+        size={50}
+        person={{ 
+          name: 'Lin Lanying',
+          imageId: '1bX5QH6'
+        }}
+      />
+    </div>
+  );
+}
+```
+propsのおかげで、親と子のコンポーネントを独立して考えることができるようになる。<br />
+例えば、`Profile`で`person`や`size`を変更するときに`Avatar`内でどう使われるかを気にしなくてよくなる。<br />
+同様に、`Avatar`がこれらのpropsをどのように使うのかは、`Profile`を見ずに変更できるようになる。<br />
+
+propsとは自分で調整できるコントローラの**ツマミ**のようなもの。<br />
+関数における引数と同じ役割を果たしている。<br />
+
+```javascript
+function Avatar(props) {
+  let person = props.person;
+  let size = props.size;
+  // ...
+}
+```
+
+通常は`props`オブジェクト全体を必要とすることはないため、個々のpropsへと分割代入する。<br />
+
+> [!NOTE]
+> propsを宣言する際は`()`の中に`{}`という**波括弧のペアを描き忘れないように**
+> ```javascript
+>   function Avatar ({ person, size }) {
+>     // ...
+>   }
+> ```
+> この構文は**分割代入**と呼ばれるもので、関数の引数からプロパティを読み出す以下のようなコードと同等。
+> ```javascript
+> function Avatar(props) {
+>   let person = props.person;
+>   let size = props.size;
+>   // ...
+> }
+> ```
+
+
+## propsのデフォルト値を指定する
+propsに、値が渡されなかった場合にフォールバックとして使うデフォルト値を指定したい場合、分割代入の中でパラメータ名の後に`=`とデフォルト値を書くことができる。<br />
+
+```javascript
+function Avatar({ person, size = 100 }) {
+  // ...
+}
+```
+
+これで、`size`プロパティを指定せずに`<Avatar person={...} />`のようにレンダーされた場合、`size`は`100`にセットされる。<br />
+
+このデフォルト値は`size`がない場合や`size={undefined}`を渡した場合にのみ使用される。<br />
+`size={null}`や`size={0}`を渡した場合にはデフォルト値は**使われないことに注意**。
+
+## JSXスプレッド構文でpropsを転送する
 
 
