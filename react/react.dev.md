@@ -794,5 +794,108 @@ function Avatar({ person, size = 100 }) {
 `size={null}`や`size={0}`を渡した場合にはデフォルト値は**使われないことに注意**。
 
 ## JSXスプレッド構文でpropsを転送する
+propsの受け渡しが冗長な繰り返しになってしまうことがある。<br />
+```javascript
+function Profile({ person, size, isSepia, thickBorder }) {
+  return (
+    <div className="card">
+      <Avatar
+        person={person}
+        size={size}
+        isSepia={isSepia}
+        thickBorder={thickBorder}
+      />
+    </div>
+  );
+}
+```
+簡潔に書くために以下のような**スプレッド構文**を使って書くとよい。<br />
 
+```javascript
+function Profile(props) {
+  return (
+    <div className="card">
+      <Avatar {...props} />
+    </div>
+  );
+}
+```
+これにより`Profile`に渡されたpropsを、個々の名前を列挙することなくすべて`Avatar`に転送できる。<br />
 
+## childrenとしてJSXを渡す
+ブラウザの組み込みタグをネストすることはよくある。<br />
+
+```javascript
+<div>
+  <img />
+</div>
+```
+同様に独自コンポーネントもネストしたくなることがある。<br />
+
+```javascript
+<Card>
+  <Avatar />
+</Card>
+```
+このようにJSXタグ内でコンテンツをネストした場合、親側のコンポーネントはその中身を`children`というpropsとして受け取る。<br />
+例えば、以下の`Card`コンポーネントは`<Avatar />`がセットされた`children`プロパティを受け取ってラッパdiv要素の内部にそれをレンダーしている。<br />
+
+```javascript
+import Avatar from './Avatar.js';
+
+function Card({ children }) {
+  return (
+    <div className="card">
+      {children}
+    </div>
+  );
+}
+
+export default function Profile() {
+  return (
+    <Card>
+      <Avatar
+        size={100}
+        person={{ 
+          name: 'Katsuko Saruhashi',
+          imageId: 'YfeOqp2'
+        }}
+      />
+    </Card>
+  );
+}
+```
+`children`プロパティを有するコンポーネントには、親に任意のJSXで「埋めて」もらうための「穴」が開いている、と考えることができる。<br />
+
+## propsは時間とともに変化する
+以下の`Clock`コンポーネントは親コンポーネントから`color`と`time`という2つのpropsを受け取っている。<br />
+
+```javascript
+export default function Clock({ color, time }) {
+  return (
+    <h1 style={{ color: color }}>
+      {time}
+    </h1>
+  );
+}
+```
+上記の例では、**コンポーネントは時間経過とともに別のpropsを受け取る可能性がある**ということを示す。<br />
+ここでは、`time`プロパティは毎秒変化するし、`color`プロパティも別の色を選択するたびに変化する。<br />
+propsとはコンポーネントの最初の時点ではなく、任意の時点でのコンポーネントのデータを反映するもの。<br />
+
+だが、propsは*イミュータブル*であり、これは「不変」という意味のCS用語である。<br />
+コンポーネントのpropsが変わらないといけない場合、親のコンポーネントに別のprops、つまり新しいオブジェクトを渡してもらう必要がある。<br />
+古いpropsは忘れられ、使われたメモリはJSエンジンがそのうち回収する。<br />
+
+なので**propsの書き換えを使用としてはいけない。**ユーザーの入力に反応する必要がある場合は、「stateのセット」が必要。<br />
+
+## まとめ
+- propsを渡すにはHTMLで属性を書くのと同様の方法でJSX内に記載する。
+- propsを呼び出すには、`function Avatar({ person, size })`のような分割代入構文を使う。
+- `size = 100`のようなデフォルト値を指定でき、これはpropsがない場合や`undefined`の場合に使われる。
+- `<Avatar {...props} />`のようなJSXスプレッド構文ですべてのpropsを転送できる。（多様はしない方がよい）
+- `<Card><Avatar /></Card>`のようなネストされたJSXを書くと`Card`コンポーネントの`children`プロパティになる。
+- propsとはある時点の読み取り専用のスナップショットである。レンダー毎に新しいバージョンのpropsを受け取る。
+- propsを書き換えることはできない。インタラクティブ性が必要な場合はstateを設定する必要がある。
+
+# 条件付きレンダー
