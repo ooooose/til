@@ -1029,3 +1029,147 @@ export default function PackingList() {
 
 ## 条件付きでJSXを含める
 
+以下のコードのように書くと、コードの保守性は悪化する。<br />
+
+```javascript
+if (isPacked) {
+  return <li className="item">{name} ✔</li>;
+}
+return <li className="item">{name}</li>;
+```
+例えば、`className`を変更したくなったら、コード内の２箇所で変更が必要になってしまう。<br />
+このような状況では、条件つkいで小さなJSXを含めることで、コードをより`DRY`に保つことができる。<br />
+
+### 三項演算子の活用
+JavaScriptには、条件式を書くためのコンパクトな構文がある。それが条件演算子または「三項演算子」と呼ばれるものです。<br />
+
+以下のコードは<br />
+
+```javascript
+if (isPacked) {
+  return <li className="item">{name} ✔</li>;
+}
+return <li className="item">{name}</li>;
+```
+以下のように書くことができる。<br />
+
+```javascript
+return (
+  <li className="item">
+    {isPacked ? name + ' ✔' : name}
+  </li>
+);
+```
+
+これは「`isPacked`が*true*なら`name + ' ✔'`をレンダーし、それ以外（`:`）の場合は`name`をレンダーする」というように読む。<br />
+
+
+
+次に、梱包済みのアイテムを、取り消し線を表示する`<del>`のような別のタグで囲みたいとする。<br />
+このような場合、trueとfalseのそれぞれの場合に対応する改行や括弧を追加することで、ネストされたJSXを読みやすくすることができる。<br />
+
+```javascript
+function Item({ name, isPacked }) {
+  return (
+    <li className="item">
+      {isPacked ? (
+        <del>
+          {name + ' ✔'}
+        </del>
+      ) : (
+        name
+      )}
+    </li>
+  );
+}
+
+export default function PackingList() {
+  return (
+    <section>
+      <h1>Sally Ride's Packing List</h1>
+      <ul>
+        <Item 
+          isPacked={true} 
+          name="Space suit" 
+        />
+        <Item 
+          isPacked={true} 
+          name="Helmet with a golden leaf" 
+        />
+        <Item 
+          isPacked={false} 
+          name="Photo of Tam" 
+        />
+      </ul>
+    </section>
+  );
+}
+```
+これはシンプルな条件分岐の場合にはうまく動くが、使いすぎないようにすること。<br />
+条件のためのマークアップが増えすぎてコンポーネントが見えづらくなった場合は、見えやすくするために子コンポーネントを抽出することを検討すべき。<br />
+Reactではマークアップはプログラミングコードの一種なので、変数や関数といったツールを利用して複雑な式を読みやすく整頓することができる。<br />
+
+### 論理演算子（`&&`）
+もう一つよく使われるショートカットは、`JavaScriptの論理演算子（&&）`。<br />
+Reactコンポーネント内で、条件が真の場合にJSXをレンダーし、**それ以外の場合は何もレンダーしない**という場合にしばしば利用される。<br />
+`&&`を使用すると、`isPacked`が`true`の場合にのみチェクマークを条件付きでレンダーできる。<br />
+
+```javascript
+return (
+  <li className="item">
+    {name} {isPacked && '✔'}
+  </li>
+);
+```
+
+これは「`isPacked`なら(`&&`)、チェックマークをレンダーし、それ以外の場合には何もレンダーしない」のように読む。<br />
+
+以下が完成系のコード。<br />
+
+```javascript
+function Item({ name, isPacked }) {
+  return (
+    <li className="item">
+      {name} {isPacked && '✔'}
+    </li>
+  );
+}
+
+export default function PackingList() {
+  return (
+    <section>
+      <h1>Sally Ride's Packing List</h1>
+      <ul>
+        <Item 
+          isPacked={true} 
+          name="Space suit" 
+        />
+        <Item 
+          isPacked={true} 
+          name="Helmet with a golden leaf" 
+        />
+        <Item 
+          isPacked={false} 
+          name="Photo of Tam" 
+        />
+      </ul>
+    </section>
+  );
+}
+```
+JavaScriptの&&色は、左側（条件）が`true`である場合、右側（今回はチェックマーク）の値を返す。<br />
+しかし、条件が`false`である場合、式全体が`false`になる。<br />
+Reactは、`false`をJSXツリーの「穴」とみなし、`null`や`undefined`と同様に何もレンダーしない。<br />
+
+> [!NOTE]
+> ### `&&`の左辺に数値を置かない
+> JavaScriptは条件をテストする際、左辺を自動的に真偽値に変換する。しかし、左辺が`0`の場合は、式全体が`0`という値に評価されてしまうため、Reactは何もレンダーしないのではなく`0`を表示する。
+> 
+> 例えばよくある間違いとして`messageCount && <p>New Messages</p>`のようなコードが挙げられる。
+> `messageCount`が`0`の場合は何も表示しないと思われがちだが、実際には`0`そのものが表示されてしまう。
+> 
+> これを修正するには、左辺を真偽値にする必要がある。：`messageCount > 0 && <p>New Messages</p>`
+
+
+## 条件付きでJSXを変数に割り当てる
+
