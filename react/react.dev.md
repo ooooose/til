@@ -899,3 +899,133 @@ propsとはコンポーネントの最初の時点ではなく、任意の時点
 - propsを書き換えることはできない。インタラクティブ性が必要な場合はstateを設定する必要がある。
 
 # 条件付きレンダー
+
+## 条件を満たす場合にJSXを返す
+複数の`Item`をレンダーする`PackingList`コンポーネントがあるとする。<br />
+
+```javascript
+
+function Item({ name, isPacked }) {
+  return <li className="item">{name}</li>;
+}
+
+export default function PackingList() {
+  return (
+    <section>
+      <h1>Sally Ride's Packing List</h1>
+      <ul>
+        <Item 
+          isPacked={true} 
+          name="Space suit" 
+        />
+        <Item 
+          isPacked={true} 
+          name="Helmet with a golden leaf" 
+        />
+        <Item 
+          isPacked={false} 
+          name="Photo of Tam" 
+        />
+      </ul>
+    </section>
+  );
+}
+```
+
+複数の`Item`コンポーネントのうち一部のみで、propsである`isPacked`が`false`ではなく`true`になっていることに注意。<br />
+目的は、`isPacked={true}`の場合にのみチェックマークを表示させるようにしたい。<br />
+この場合`if/else文`を使って以下のように書くことができる。<br />
+
+
+```javascript
+if (isPacked) {
+  return <li className="item">{name} ✔</li>;
+}
+return <li className="item">{name}</li>;
+```
+`isPacked`プロパティがtrueだった場合、このコードは**異なるJSXツリーを返す**。この変更により、一部のアイテムの末尾にチェックマークが表示されるようになる。<br />
+
+```javascript
+function Item({ name, isPacked }) {
+  if (isPacked) {
+    return <li className="item">{name} ✔</li>;
+  }
+  return <li className="item">{name}</li>;
+}
+
+export default function PackingList() {
+  return (
+    <section>
+      <h1>Sally Ride's Packing List</h1>
+      <ul>
+        <Item 
+          isPacked={true} 
+          name="Space suit" 
+        />
+        <Item 
+          isPacked={true} 
+          name="Helmet with a golden leaf" 
+        />
+        <Item 
+          isPacked={false} 
+          name="Photo of Tam" 
+        />
+      </ul>
+    </section>
+  );
+}
+```
+[![Image from Gyazo](https://i.gyazo.com/ff9a72356e986f4c36a33f985ac47fdb.png)](https://gyazo.com/ff9a72356e986f4c36a33f985ac47fdb) <br />
+
+条件分岐ロジックを実装するためにJavaScriptの`if`や`return`文を使う。Reactにおいて制御フロー（条件分岐など）はJavaScriptで処理される。<br />
+
+## `null`を使って何も返されないようにする
+場合によっては、何もレンダーしたくないことがあるが、コンポーネントは常に何かを返す必要がある。<br />
+このような場合、`null`を返すことができる。<br />
+
+```javascript
+if (isPacked) {
+  return null;
+}
+return <li className="item">{name}</li>;
+```
+
+`isPacked`が`true`の場合、コンポーネントは「何も表示しない」という意味で`null`を返す。<br />
+それ以外の場合、レンダーするJSXを返す。<br />
+
+```javascript
+function Item({ name, isPacked }) {
+  if (isPacked) {
+    return null;
+  }
+  return <li className="item">{name}</li>;
+}
+
+export default function PackingList() {
+  return (
+    <section>
+      <h1>Sally Ride's Packing List</h1>
+      <ul>
+        <Item 
+          isPacked={true} 
+          name="Space suit" 
+        />
+        <Item 
+          isPacked={true} 
+          name="Helmet with a golden leaf" 
+        />
+        <Item 
+          isPacked={false} 
+          name="Photo of Tam" 
+        />
+      </ul>
+    </section>
+  );
+}
+```
+実際には、レンダーしようとしている開発者を混乱させる可能性があるため、コンポーネントから`null`を返すことは一般的ではない。<br />
+
+代わりに、親コンポーネント側のJSXで条件付きでコンポーネントを含めたり除外したりすることが多い。<br />
+
+## 条件付きでJSXを含める
+
